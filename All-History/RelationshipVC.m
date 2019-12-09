@@ -16,7 +16,7 @@
 #define kScreenHeight [UIScreen mainScreen].bounds.size.height
 @interface RelationshipVC ()<UIScrollViewDelegate>
 @property (nonatomic, strong) UIScrollView *sc;
-@property (nonatomic, strong) UIImageView *imgView;
+@property (nonatomic, strong) UIView *bgView;
 
 @property (nonatomic, strong) PetalMainView *petalView;
 @property (nonatomic, strong) RelationItemView *relationView;
@@ -35,19 +35,23 @@
     _sc.minimumZoomScale = 0.5;
     [self.view addSubview:_sc];
     
+    _bgView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, kScreenWidth * 2, kScreenHeight * 3)];
+    _bgView.backgroundColor = [UIColor whiteColor];
+    [_sc addSubview:_bgView];
+    
     _relationView = [[RelationItemView alloc] initWithFrame:CGRectMake(0, 0, 200,200) withDegree:0];
-    _relationView.center = _sc.center;
+    _relationView.center = _bgView.center;
     NSMutableArray *items = [NSMutableArray array];
     for (int i=0; i<6; i++) {
         [items addObject:[NSNumber numberWithInt:i]];
     }
     _relationView.subItems = items;
-    [_sc addSubview:_relationView];
+    [_bgView addSubview:_relationView];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
-    _sc.contentSize = CGSizeMake(kScreenWidth * 10 , kScreenHeight * 10);
+    _sc.contentSize = CGSizeMake(kScreenWidth * 2 , kScreenHeight * 3);
 }
 
 - (void)addMinItemsView:(RelationItemView *)relationView {
@@ -77,7 +81,7 @@
 
 - (UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView
 {
-    return _relationView;
+    return _bgView;
 }
 
 //

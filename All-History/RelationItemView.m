@@ -82,11 +82,11 @@
     _isExpend = isExpend;
     for (int i=0; i<self.subItems.count; i++) {
         RelationItemView *obj = self.itemViews[i];
-        for (RelationItemView *s in obj.subviews) {
-            if ([s isKindOfClass:[RelationItemView class]]) {
-                [s expend:NO];
-            }
-        }
+//        for (RelationItemView *s in obj.subviews) {
+//            if ([s isKindOfClass:[RelationItemView class]]) {
+//                [s expend:NO];
+//            }
+//        }
         if (self.scale) {
             if (isExpend) {
                 obj.transform = CGAffineTransformIdentity;
