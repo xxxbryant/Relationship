@@ -22,6 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) CGFloat farDistance;
 @property (nonatomic, assign) CGFloat width;
 @property (nonatomic, assign) CGFloat height;
+@property (nonatomic, assign) CGFloat deflectRadius;   // 偏转角度
 @property (nonatomic, strong) PetalView *mainView;
 @property (nonatomic, strong) NSMutableArray *subItems;
 @property (nonatomic, strong) NSMutableArray <RelationItemView *> *itemViews;

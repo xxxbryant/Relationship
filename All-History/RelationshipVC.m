@@ -31,18 +31,20 @@
     
     _sc.backgroundColor = [UIColor whiteColor];
     _sc.delegate = self;
-    _sc.maximumZoomScale = 3;
-    _sc.minimumZoomScale = 0.5;
+    _sc.maximumZoomScale = 10;
+    _sc.minimumZoomScale = 0.1;
     [self.view addSubview:_sc];
     
-    _bgView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, kScreenWidth * 2, kScreenHeight * 3)];
-    _bgView.backgroundColor = [UIColor whiteColor];
+    _bgView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, kScreenWidth * 3, kScreenHeight * 3)];
+    _bgView.backgroundColor = [UIColor orangeColor];
     [_sc addSubview:_bgView];
+//    [_sc setContentOffset:CGPointMake(_bgView.center.x - 100, _bgView.center.y - 100)  animated:YES];
     
-    _relationView = [[RelationItemView alloc] initWithFrame:CGRectMake(0, 0, 200,200) withDegree:0];
+    _relationView = [[RelationItemView alloc] initWithFrame:CGRectMake(0, 0, 90,90) withDegree:0];
     _relationView.center = _bgView.center;
+    _relationView.deflectRadius = 0;
     NSMutableArray *items = [NSMutableArray array];
-    for (int i=0; i<6; i++) {
+    for (int i=0; i<8; i++) {
         [items addObject:[NSNumber numberWithInt:i]];
     }
     _relationView.subItems = items;
@@ -51,7 +53,7 @@
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
-    _sc.contentSize = CGSizeMake(kScreenWidth * 2 , kScreenHeight * 3);
+    _sc.contentSize = CGSizeMake(kScreenWidth *3 , kScreenHeight*3);
 }
 
 - (void)addMinItemsView:(RelationItemView *)relationView {

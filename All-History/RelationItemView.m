@@ -16,12 +16,12 @@
     if (self) {
 //        self.startPoint = CGPointMake(100, 100);
 //        // 修改这时的参数来调整大圆与圆之间的距离
-        self.nearDistance = 30 / (degree + 1);
-        self.farDistance = 100 / (degree + 1);
-        self.endDistance = 80 / (degree + 1);
-        self.degree = degree;
         self.height = frame.size.height;
         self.width = frame.size.width;
+        self.nearDistance = 20 - degree * 10;
+        self.farDistance = 90  - degree * 90;
+        self.endDistance = 90  - degree * 90;
+        self.degree = degree;
         self.scale = 1;
         self.backgroundColor = [UIColor clearColor];
         [self addSubview:self.mainView];
@@ -33,28 +33,34 @@
     if (_subItems != subItems) {
         _subItems = subItems;
         int count = (int)[subItems count];
-        NSMutableArray *array = @[@1,@2];
+        NSMutableArray *array = @[@1,@2,@1,@2];
         for (int i = 0; i < count; i ++) {
-            RelationItemView *item = [[RelationItemView alloc] initWithFrame:CGRectMake(0, 0,100/ (self.degree + 1) - 10, 100/ (self.degree + 1) - 10) withDegree:self.degree + 1];
-//            [array addObject:[NSNumber numberWithInt:i]];
-           
+            RelationItemView *item = [[RelationItemView alloc] initWithFrame:CGRectMake(0, 0,self.height - 10 * (self.degree + 1), self.width - 10 * (self.degree + 1)) withDegree:self.degree + 1];
             item.tag = 1000 + i;
-            item.startPoint = CGPointMake(self.bounds.size.width / 2, self.bounds.size.height / 2);
-//            CGFloat pi = 2 * i * M_PI / count + M_PI / count ;
-//            if (i>5) {
-//                pi = M_PI / 6 + (i%6) * M_PI / 3;
-//            }
             CGFloat pi = M_PI / 6 + (i%6) * M_PI / 3 ;
+            item.startPoint = CGPointMake(self.bounds.size.width / 2, self.bounds.size.height / 2);
             CGFloat endRadius = item.bounds.size.width / 2 + self.endDistance + self.bounds.size.width / 2;
-            
             CGFloat nearRadius = item.bounds.size.width / 2 + self.nearDistance + self.bounds.size.width / 2;
             CGFloat farRadius = item.bounds.size.width / 2 + self.farDistance + self.bounds.size.width / 2;
             if (i >= 6) {
-                endRadius = item.bounds.size.width / 2 + self.endDistance + 150 + self.bounds.size.width / 2;
+                endRadius = item.bounds.size.width / 2 + self.endDistance + 150 * (self.degree + 1)  + self.bounds.size.width / 2;
                 pi = (i%6 + 1) * M_PI / 3;
-                nearRadius = item.bounds.size.width / 2 + self.nearDistance + 150 + self.bounds.size.width / 2;
-                farRadius = item.bounds.size.width / 2 + self.farDistance + 150 + self.bounds.size.width / 2;
+                nearRadius = item.bounds.size.width / 2 + self.nearDistance + 150  *  (self.degree + 1) + self.bounds.size.width / 2;
+                farRadius = item.bounds.size.width / 2 + self.farDistance + 150 *  (self.degree + 1) + self.bounds.size.width / 2;
             }
+            
+            
+            if (self.degree == 1) {
+                pi =  2*i * M_PI / array.count  ;
+            }
+            
+            pi = pi + self.deflectRadius;
+            if (array.count > 6) {
+              item.deflectRadius = pi - M_PI / 3 * array.count;
+            } else {
+                item.deflectRadius = pi - M_PI / 6 * array.count;
+            }
+            
             item.endPoint = CGPointMake(item.startPoint.x - endRadius * cosf(pi),
                                         item.startPoint.y - endRadius * sinf(pi));
             
@@ -184,7 +190,7 @@
 
 - (PetalView *)mainView {
     if (_mainView == nil) {
-        _mainView = [[PetalView alloc] initWithFrame:CGRectMake(0, 0, self.height / (self.degree + 1), self.height / (self.degree + 1))];
+        _mainView = [[PetalView alloc] initWithFrame:CGRectMake(0, 0, self.height - 10, self.width - 10)];
         _mainView.center = self.center;
         _mainView.backgroundColor = [UIColor yellowColor];
         if (self.degree == 1) {
@@ -217,12 +223,6 @@
                         if ([sub isKindOfClass:[PetalView class]]) {
                             return sub;
                         }
-//                        CGPoint p = [sub convertPoint:myPoint fromView:subView];
-//                        RelationItemView *s = (RelationItemView *)subView;
-//                        if (CGRectContainsPoint(s.mainView.bounds, p)) {
-//                            NSLog(@"%ld", (long)s.degree);
-//                            return sub;
-//                        }
                     }
                 }
             }
@@ -231,55 +231,4 @@
     return view;
 }
 
-//
-//
-//- (void)drawDashLine:(CGPoint)startPoint point:(CGPoint)endPoint  {
-//    UIBezierPath *path = [UIBezierPath bezierPath];
-//    [path moveToPoint:startPoint];
-//    [path addLineToPoint:endPoint];
-//    [path setLineWidth:2];
-//    CGFloat dash[] = {8.0,4.0,16.0,8.0};
-//    [path setLineDash:dash count:6 phase:2];
-//    [path stroke];
-//    [path fill];
-//    CAShapeLayer *layer = [CAShapeLayer new];
-//    [layer setPath:[path CGPath]];
-//    layer.fillColor = [[UIColor clearColor] CGColor];
-//    layer.strokeColor = [[UIColor redColor] CGColor];
-//    layer.lineWidth = 5.0;
-//    [self.layer insertSublayer:layer atIndex:0];
-//    [self.layerItems addObject:layer];
-//    [layer setHidden:YES];
-//    
-//}
-//
-//- (void)layerAnimation:(CAShapeLayer *)layer toShow:(BOOL)show {
-//    if(show) {
-//        [layer setHidden:NO];
-//        CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"strokeEnd"];
-//        animation.fromValue = @(0.0);
-//        animation.toValue = @(1.0);
-//        animation.duration = 1.5;
-//        [layer addAnimation:animation forKey:nil];
-////        layer.strokeEnd = 1.0;
-//    } else {
-//        CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"strokeEnd"];
-//        animation.fromValue = @(1.0);
-//        animation.toValue = @(0.0);
-//        animation.duration = 2.0;
-//        animation.delegate = self;
-//        [layer addAnimation:animation forKey:nil];
-////        layer.strokeEnd = 0.0;
-//    }
-//}
-//
-//-(void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag{
-//    NSLog(@"yes");
-//    [self.layerItems enumerateObjectsUsingBlock:^(CAShapeLayer *obj, NSUInteger idx, BOOL * _Nonnull stop) {
-//        //        [obj setHidden:YES];
-//        //        [obj removeFromSuperlayer];
-//    }];
-//}
-//
 @end
-//
