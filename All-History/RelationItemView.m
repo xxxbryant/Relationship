@@ -88,23 +88,18 @@
     _isExpend = isExpend;
     for (int i=0; i<self.subItems.count; i++) {
         RelationItemView *obj = self.itemViews[i];
-//        for (RelationItemView *s in obj.subviews) {
-//            if ([s isKindOfClass:[RelationItemView class]]) {
-//                [s expend:NO];
-//            }
-//        }
         if (self.scale) {
             if (isExpend) {
                 obj.transform = CGAffineTransformIdentity;
+                obj.mainView.transform = CGAffineTransformIdentity;
             } else {
                 obj.transform = CGAffineTransformMakeScale(0.001, 0.001);
             }
         }
         [self addRotateAndPostisionForItem:obj toShow:isExpend];
-//        [self layerAnimation:layer toShow:isExpend];
     }
 }
-//
+
 - (void)addRotateAndPostisionForItem:(RelationItemView *)item toShow:(BOOL)show {
     if (show) {
         CABasicAnimation *scaleAnimation = nil;
@@ -197,8 +192,12 @@
             _mainView.backgroundColor = [UIColor greenColor];
         }
         if (self.degree == 2) {
+            _mainView.transform = CGAffineTransformMakeScale(0.001, 0.001);
             _mainView.backgroundColor = [UIColor purpleColor];
+            _mainView.title.text = @"晋国鸟尊";
+            [_mainView.title setHidden:NO];
         }
+        
         UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(expend)];
         [_mainView addGestureRecognizer:tap];
     }
