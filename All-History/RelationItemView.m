@@ -23,13 +23,29 @@
         self.degree = degree;
         self.scale = 1;
         self.backgroundColor = [UIColor clearColor];
-        [self addSubview:self.mainView];
-        
-        //        [self drawDashLine];
     }
     return self;
 }
 
+- (void)setupCenterView:(NSInteger)type withURL:(NSString *)url {
+    _mainView = [[PetalView alloc] initWithFrame:CGRectMake(0, 0, self.height - 10, self.width - 10)];
+    _mainView.center = self.center;
+    if (self.degree == 1) {
+        [_mainView setupImageView:[NSString stringWithFormat:@"%li_%li",(long)self.degree,(long)type]];
+    }
+    if (self.degree == 2) {
+        _mainView.transform = CGAffineTransformMakeScale(0.001, 0.001);
+        [_mainView setupImageView:[NSString stringWithFormat:@"%li_%li",(long)self.degree,(long)type]];
+        _mainView.title.text = @"晋国鸟尊";
+        [_mainView.title setHidden:NO];
+    }
+    if (url) {
+        [_mainView setupImageView:url];
+       }
+    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(expend)];
+    [_mainView addGestureRecognizer:tap];
+     [self addSubview:self.mainView];
+}
 
 
 - (void)setSubItems:(NSMutableArray *)subItems {
@@ -39,6 +55,7 @@
         NSMutableArray *array = [@[@1,@2,@1,@2] mutableCopy];
         for (int i = 0; i < count; i ++) {
             RelationItemView *item = [[RelationItemView alloc] initWithFrame:CGRectMake(0, 0,self.height - 10 * (self.degree + 1), self.width - 10 * (self.degree + 1)) withDegree:self.degree + 1];
+            [item setupCenterView:i withURL:nil];
             CGFloat pi = M_PI / 6 + (i%6) * M_PI / 3 ;
             item.startPoint = CGPointMake(self.bounds.size.width / 2, self.bounds.size.height / 2);
             CGFloat endRadius = item.bounds.size.width / 2 + self.endDistance + self.bounds.size.width / 2;
@@ -69,14 +86,12 @@
             CAShapeLayer *shapeLayer = [self drawDashLine:item.startPoint with:item.endPoint];
             item.dashLine = shapeLayer;
             [item.dashLines addObject:shapeLayer];
-           
+            
             [self addSubview:item];
             [self.itemViews addObject:item];
             
-           
             if (self.degree == 0) {
                 [item setSubItems:array];
-                
             }
         }
         [self bringSubviewToFront:self.mainView];
@@ -103,21 +118,19 @@
 
 - (void)addDashLineAnimation:(RelationItemView *)item toShow:(BOOL)show {
     if (show) {
-         
         CABasicAnimation *strokeAnimation = [CABasicAnimation animationWithKeyPath:@"strokeEnd"];
         strokeAnimation.fromValue = @0;
         strokeAnimation.toValue = @1;
-        strokeAnimation.duration = 1.5f;
+        strokeAnimation.duration = 1.3f;
         strokeAnimation.removedOnCompletion = NO;
         strokeAnimation.fillMode = kCAFillModeForwards;
         strokeAnimation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
         [item.dashLine addAnimation:strokeAnimation forKey:@"strokeAnimation"];
-       
     } else {
         CABasicAnimation *strokeAnimation = [CABasicAnimation animationWithKeyPath:@"strokeEnd"];
         strokeAnimation.fromValue = @1;
         strokeAnimation.toValue = @0;
-        strokeAnimation.duration = 1.5f;
+        strokeAnimation.duration = 1.3f;
         strokeAnimation.removedOnCompletion = NO;
         strokeAnimation.fillMode = kCAFillModeForwards;
         strokeAnimation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
@@ -127,19 +140,12 @@
 
 - (void)addRotateAndPostisionForItem:(RelationItemView *)item toShow:(BOOL)show {
     if (show) {
-        CABasicAnimation *scaleAnimation = nil;
-        if (self.scale) {
-            scaleAnimation = [CABasicAnimation animationWithKeyPath:@"transform.scale"];
-            scaleAnimation.fromValue = [NSNumber numberWithFloat:0.2];
-            scaleAnimation.toValue = [NSNumber numberWithFloat:1.0];
-            scaleAnimation.duration = 1.5f;
-            scaleAnimation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
-        }
+        CABasicAnimation *scaleAnimation = [CABasicAnimation animationWithKeyPath:@"transform.scale"];
+        scaleAnimation.fromValue = [NSNumber numberWithFloat:0.2];
+        scaleAnimation.toValue = [NSNumber numberWithFloat:1.0];
+        scaleAnimation.duration = 1.5f;
+        scaleAnimation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
         
-        CAKeyframeAnimation *rotateAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.rotation.z"];
-        rotateAnimation.values = @[@(M_PI), @(0.0)];
-        rotateAnimation.duration = 1.5f;
-        rotateAnimation.keyTimes = @[@(0.3), @(0.4)];
         
         CAKeyframeAnimation *positionAnimation = [CAKeyframeAnimation animationWithKeyPath:@"position"];
         positionAnimation.duration = 1.5f;
@@ -151,31 +157,20 @@
         CGPathRelease(path);
         
         CAAnimationGroup *animationgroup = [CAAnimationGroup animation];
-        if (self.scale) {
-            animationgroup.animations = @[ scaleAnimation,positionAnimation];
-        } else {
-            animationgroup.animations = @[positionAnimation, scaleAnimation];
-        }
-        animationgroup.duration = 1.5f;
+        animationgroup.animations = @[positionAnimation, scaleAnimation];
+        animationgroup.duration = 5.0f;
         animationgroup.fillMode = kCAFillModeForwards;
         animationgroup.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
         [item.layer addAnimation:animationgroup forKey:@"Expand"];
         item.center = item.endPoint;
         
     } else {
-        CABasicAnimation *scaleAnimation = nil;
-        if (self.scale) {
-            scaleAnimation = [CABasicAnimation animationWithKeyPath:@"transform.scale"];
-            scaleAnimation.fromValue = [NSNumber numberWithFloat:1.0];
-            scaleAnimation.toValue = [NSNumber numberWithFloat:0.2];
-            scaleAnimation.duration = 1.5f;
-            scaleAnimation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
-        }
+        CABasicAnimation *scaleAnimation = [CABasicAnimation animationWithKeyPath:@"transform.scale"];
+        scaleAnimation.fromValue = [NSNumber numberWithFloat:1.0];
+        scaleAnimation.toValue = [NSNumber numberWithFloat:0.2];
+        scaleAnimation.duration = 1.5f;
+        scaleAnimation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
         
-        CAKeyframeAnimation *rotateAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.rotation.z"];
-        rotateAnimation.values = @[@0, @(M_PI * 2), @(0)];
-        rotateAnimation.duration = 1.5f;
-        rotateAnimation.keyTimes = @[@0, @(0.4), @(0.5)];
         CAKeyframeAnimation *positionAnimation = [CAKeyframeAnimation animationWithKeyPath:@"position"];
         positionAnimation.duration = 1.5f;
         CGMutablePathRef path = CGPathCreateMutable();
@@ -186,12 +181,7 @@
         CGPathRelease(path);
         
         CAAnimationGroup *animationgroup = [CAAnimationGroup animation];
-        if (self.scale) {
-            animationgroup.animations = @[scaleAnimation,positionAnimation];
-        } else {
-            animationgroup.animations = @[positionAnimation, scaleAnimation];
-        }
-        
+        animationgroup.animations = @[scaleAnimation,positionAnimation];
         animationgroup.duration = 1.5f;
         animationgroup.fillMode = kCAFillModeForwards;
         animationgroup.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
@@ -226,26 +216,26 @@
 }
 
 
-- (PetalView *)mainView {
-    if (_mainView == nil) {
-        _mainView = [[PetalView alloc] initWithFrame:CGRectMake(0, 0, self.height - 10, self.width - 10)];
-        _mainView.center = self.center;
-        _mainView.backgroundColor = [UIColor yellowColor];
-        if (self.degree == 1) {
-            _mainView.backgroundColor = [UIColor greenColor];
-        }
-        if (self.degree == 2) {
-            _mainView.transform = CGAffineTransformMakeScale(0.001, 0.001);
-            _mainView.backgroundColor = [UIColor purpleColor];
-            _mainView.title.text = @"晋国鸟尊";
-            [_mainView.title setHidden:NO];
-        }
-        
-        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(expend)];
-        [_mainView addGestureRecognizer:tap];
-    }
-    return _mainView;
-}
+//- (PetalView *)mainView {
+//    if (_mainView == nil) {
+//        _mainView = [[PetalView alloc] initWithFrame:CGRectMake(0, 0, self.height - 10, self.width - 10)];
+//        _mainView.center = self.center;
+//        _mainView.backgroundColor = [UIColor yellowColor];
+//        if (self.degree == 1) {
+//            _mainView.backgroundColor = [UIColor greenColor];
+//        }
+//        if (self.degree == 2) {
+//            _mainView.transform = CGAffineTransformMakeScale(0.001, 0.001);
+//            _mainView.backgroundColor = [UIColor purpleColor];
+//            _mainView.title.text = @"晋国鸟尊";
+//            [_mainView.title setHidden:NO];
+//        }
+//
+//        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(expend)];
+//        [_mainView addGestureRecognizer:tap];
+//    }
+//    return _mainView;
+//}
 
 - (NSMutableArray<RelationItemView *> *)itemViews {
     if (_itemViews == nil) {

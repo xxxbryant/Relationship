@@ -26,21 +26,30 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-//    [self test];
+
+    UIImageView *bgView = [[UIImageView alloc] initWithFrame:self.view.bounds];
+    bgView.image = [UIImage imageNamed:@"bg"];
+    [self.view addSubview:bgView];
+    
     _sc = [[UIScrollView alloc] initWithFrame:self.view.bounds];
     
-    _sc.backgroundColor = [UIColor whiteColor];
+    _sc.showsVerticalScrollIndicator = NO;
+    _sc.showsHorizontalScrollIndicator = NO;
+    _sc.backgroundColor = [UIColor clearColor];
     _sc.delegate = self;
-    _sc.maximumZoomScale = 10;
-    _sc.minimumZoomScale = 0.1;
+    _sc.maximumZoomScale = 3;
+    _sc.minimumZoomScale = 0.5;
     [self.view addSubview:_sc];
     
-    _bgView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, kScreenWidth * 3, kScreenHeight * 3)];
-    _bgView.backgroundColor = [UIColor orangeColor];
+    
+    _bgView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, kScreenWidth * 100 , kScreenHeight * 100)];
+    _bgView.backgroundColor = [UIColor clearColor];
+    
     [_sc addSubview:_bgView];
-//    [_sc setContentOffset:CGPointMake(_bgView.center.x - 100, _bgView.center.y - 100)  animated:YES];
+    [_sc setContentOffset:CGPointMake(_bgView.center.x - kScreenWidth * 0.5 , _bgView.center.y - kScreenHeight * 0.5)  animated:YES];
     
     _relationView = [[RelationItemView alloc] initWithFrame:CGRectMake(0, 0, 90,90) withDegree:0];
+    [_relationView setupCenterView:0 withURL:@"space_star"];
     _relationView.center = _bgView.center;
     _relationView.deflectRadius = 0;
     NSMutableArray *items = [NSMutableArray array];
@@ -53,60 +62,13 @@
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
-    _sc.contentSize = CGSizeMake(kScreenWidth *3 , kScreenHeight*3);
-}
-
-- (void)addMinItemsView:(RelationItemView *)relationView {
-    NSMutableArray *minItems = [NSMutableArray array];
-    for (int i=0; i<7; i++) {
-        RelationItemView * p = [[RelationItemView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)];
-//        [_sc addSubview:p];
-        [minItems addObject:p];
-    }
-//    [_relationView setMenuItems:minItems];
-}
-
-- (void)test {
-    _petalView = [[PetalMainView alloc] initWithFrame:CGRectMake(kScreenWidth*0.5 - 100, 200, 200, 200)];
-    _petalView.backgroundColor = [UIColor clearColor];
-    NSMutableArray *items = [NSMutableArray array];
-    
-    for (int i=0; i<4; i++) {
-        PetalView * p = [[PetalView alloc] initWithFrame:CGRectMake(0, 0, 50, 50)];
-        [items addObject:p];
-    }
-    
-    [_petalView setMenuItems:items];
-    [self.view addSubview:_petalView];
+    _sc.contentSize = CGSizeMake(kScreenWidth *100 , kScreenHeight*100);
 }
 
 
-- (UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView
-{
+- (UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView {
+    NSLog(@"%f",scrollView.contentSize.width);
     return _bgView;
 }
-
-//
-//// called before the scroll view begins zooming its content缩放开始的时候调用
-//- (void)scrollViewWillBeginZooming:(UIScrollView *)scrollView withView:(nullable UIView *)view NS_AVAILABLE_IOS(3_2){
-////    NSLog(@"%s",__func__);
-//}
-//
-//// scale between minimum and maximum. called after any 'bounce' animations缩放完毕的时候调用。
-//- (void)scrollViewDidEndZooming:(UIScrollView *)scrollView withView:(UIView *)view atScale:(CGFloat)scale
-//
-//{
-//    //把当前的缩放比例设进ZoomScale，以便下次缩放时实在现有的比例的基础上
-//    NSLog(@"scale is %f",scale);
-//    [_sc setZoomScale:scale animated:YES];
-//}
-//
-//// 缩放时调用
-//- (void)scrollViewDidZoom:(UIScrollView *)scrollView{
-//    // 可以实时监测缩放比例
-//    NSLog(@"......scale is %f",_sc.zoomScale);
-//
-//}
-
 
 @end

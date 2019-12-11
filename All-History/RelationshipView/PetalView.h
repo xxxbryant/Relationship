@@ -17,6 +17,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) CGPoint nearPoint;
 @property (nonatomic, assign) CGPoint farPoint;
 @property (nonatomic, strong) UILabel *title;
+
+- (void)setupImageView:(NSString *)imgStr;
+
 @end
 
 NS_ASSUME_NONNULL_END

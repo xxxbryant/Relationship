@@ -34,7 +34,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)expend:(BOOL)isExpend;
 - (instancetype)initWithFrame:(CGRect)frame withDegree:(NSInteger)degree;
-
+- (void)setupCenterView:(NSInteger)type withURL:(NSString *)url;
 @end
 
 NS_ASSUME_NONNULL_END
