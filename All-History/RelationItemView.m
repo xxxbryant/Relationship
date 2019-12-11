@@ -36,10 +36,9 @@
     if (_subItems != subItems) {
         _subItems = subItems;
         int count = (int)[subItems count];
-        NSMutableArray *array = @[@1,@2,@1,@2];
+        NSMutableArray *array = [@[@1,@2,@1,@2] mutableCopy];
         for (int i = 0; i < count; i ++) {
             RelationItemView *item = [[RelationItemView alloc] initWithFrame:CGRectMake(0, 0,self.height - 10 * (self.degree + 1), self.width - 10 * (self.degree + 1)) withDegree:self.degree + 1];
-            item.tag = 1000 + i;
             CGFloat pi = M_PI / 6 + (i%6) * M_PI / 3 ;
             item.startPoint = CGPointMake(self.bounds.size.width / 2, self.bounds.size.height / 2);
             CGFloat endRadius = item.bounds.size.width / 2 + self.endDistance + self.bounds.size.width / 2;
@@ -51,12 +50,9 @@
                 nearRadius = item.bounds.size.width / 2 + self.nearDistance + 150  *  (self.degree + 1) + self.bounds.size.width / 2;
                 farRadius = item.bounds.size.width / 2 + self.farDistance + 150 *  (self.degree + 1) + self.bounds.size.width / 2;
             }
-            
-            
             if (self.degree == 1) {
                 pi =  2*i * M_PI / array.count  ;
             }
-            
             pi = pi + self.deflectRadius;
             if (array.count > 6) {
                 item.deflectRadius = pi - M_PI / 3 * array.count;
@@ -64,19 +60,20 @@
                 item.deflectRadius = pi - M_PI / 6 * array.count;
             }
             
-            item.endPoint = CGPointMake(item.startPoint.x - endRadius * cosf(pi),
-                                        item.startPoint.y - endRadius * sinf(pi));
-            item.nearPoint = CGPointMake(item.startPoint.x - nearRadius * cosf(pi),
-                                         item.startPoint.y - nearRadius * sinf(pi));
-            item.farPoint = CGPointMake(item.startPoint.x - farRadius * cosf(pi),
-                                        item.startPoint.y - farRadius * sinf(pi));
+            item.endPoint = CGPointMake(item.startPoint.x - endRadius * cosf(pi),item.startPoint.y - endRadius * sinf(pi));
+            item.nearPoint = CGPointMake(item.startPoint.x - nearRadius * cosf(pi),item.startPoint.y - nearRadius * sinf(pi));
+            item.farPoint = CGPointMake(item.startPoint.x - farRadius * cosf(pi),item.startPoint.y - farRadius * sinf(pi));
             item.center = item.startPoint;
+            
+            // 添加虚线
             CAShapeLayer *shapeLayer = [self drawDashLine:item.startPoint with:item.endPoint];
             item.dashLine = shapeLayer;
             [item.dashLines addObject:shapeLayer];
+           
             [self addSubview:item];
             [self.itemViews addObject:item];
             
+           
             if (self.degree == 0) {
                 [item setSubItems:array];
                 
@@ -86,8 +83,6 @@
     }
 }
 
-//
-//
 - (void)expend:(BOOL)isExpend {
     _isExpend = isExpend;
     for (int i=0; i<self.subItems.count; i++) {
@@ -100,32 +95,34 @@
                 obj.transform = CGAffineTransformMakeScale(0.001, 0.001);
             }
         }
-        [self addRotateAndPostisionForItem:obj toShow:isExpend];
         [self addDashLineAnimation:obj toShow:isExpend];
+        [self addRotateAndPostisionForItem:obj toShow:isExpend];
+        
     }
 }
 
 - (void)addDashLineAnimation:(RelationItemView *)item toShow:(BOOL)show {
     if (show) {
-        
+         
         CABasicAnimation *strokeAnimation = [CABasicAnimation animationWithKeyPath:@"strokeEnd"];
         strokeAnimation.fromValue = @0;
         strokeAnimation.toValue = @1;
         strokeAnimation.duration = 1.5f;
+        strokeAnimation.removedOnCompletion = NO;
+        strokeAnimation.fillMode = kCAFillModeForwards;
         strokeAnimation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
         [item.dashLine addAnimation:strokeAnimation forKey:@"strokeAnimation"];
-        [item.dashLine setStrokeEnd:1];
+       
     } else {
-        
         CABasicAnimation *strokeAnimation = [CABasicAnimation animationWithKeyPath:@"strokeEnd"];
         strokeAnimation.fromValue = @1;
         strokeAnimation.toValue = @0;
         strokeAnimation.duration = 1.5f;
+        strokeAnimation.removedOnCompletion = NO;
+        strokeAnimation.fillMode = kCAFillModeForwards;
         strokeAnimation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
         [item.dashLine addAnimation:strokeAnimation forKey:@"strokeAnimation"];
-        [item.dashLine setStrokeEnd:0];
     }
-    
 }
 
 - (void)addRotateAndPostisionForItem:(RelationItemView *)item toShow:(BOOL)show {
@@ -223,7 +220,6 @@
     [dashedLine setLineDashPattern: [NSArray arrayWithObjects:[NSNumber numberWithFloat:2], nil]];
     dashedLine.lineWidth = 1.0f;
     dashedLine.strokeColor =  [[UIColor redColor] CGColor];
-    
     [self.layer addSublayer:dashedLine];
     [dashedLine setStrokeEnd:0];
     return dashedLine;

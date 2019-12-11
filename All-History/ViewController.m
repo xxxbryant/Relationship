@@ -55,6 +55,8 @@
 //    [self drawLine];
 }
 
+BOOL isShow = true;
+
 - (void)buttonPressed:(UIButton *)btn
 {
     [_sphereView timerStop];
@@ -63,8 +65,9 @@
         btn.transform = CGAffineTransformMakeScale(2., 2.);
         RelationshipVC *vc = [[UIStoryboard storyboardWithName:@"Main" bundle:nil] instantiateViewControllerWithIdentifier:@"RelationshipVC"];
         [self.navigationController pushViewController:vc animated:YES];
-//        [self.view.layer addSublayer:self->_dashedLine];
-//        [self addRotateAndPostisionForItem];
+        
+//         [self addRotateAndPostisionForItem:isShow];
+//        isShow = !isShow;
     } completion:^(BOOL finished) {
         [UIView animateWithDuration:0.3 animations:^{
             btn.transform = CGAffineTransformMakeScale(1., 1.);
@@ -88,8 +91,8 @@
     [_dashedLine setLineDashPattern: [NSArray arrayWithObjects:[NSNumber numberWithFloat:2], nil]];
     _dashedLine.lineWidth = 1.0f;
     _dashedLine.strokeColor =  [[UIColor redColor] CGColor];
-
-   
+    [self.view.layer addSublayer:self->_dashedLine];
+    [_dashedLine setStrokeEnd:0];
 }
 
 - (void)drawLine {
@@ -116,12 +119,25 @@
 }
 
 
-- (void)addRotateAndPostisionForItem {
-    CABasicAnimation *strokeAnimation = [CABasicAnimation animationWithKeyPath:@"strokeEnd"];
-    strokeAnimation.fromValue = @0;
-    strokeAnimation.toValue = @1;
-    strokeAnimation.duration = 5.f;
-    [self.dashedLine addAnimation:strokeAnimation forKey:@"strokeAnimation"];
+- (void)addRotateAndPostisionForItem:(BOOL)show {
+    if (show) {
+        CABasicAnimation *strokeAnimation = [CABasicAnimation animationWithKeyPath:@"strokeEnd"];
+        strokeAnimation.fromValue = @0;
+        strokeAnimation.toValue = @1;
+        strokeAnimation.duration = 5.f;
+        strokeAnimation.removedOnCompletion = NO;
+        strokeAnimation.fillMode = kCAFillModeForwards;
+        [self.dashedLine addAnimation:strokeAnimation forKey:@"strokeAnimation"];
+    } else {
+        CABasicAnimation *strokeAnimation = [CABasicAnimation animationWithKeyPath:@"strokeEnd"];
+        strokeAnimation.fromValue = @1;
+        strokeAnimation.toValue = @0;
+        strokeAnimation.duration = 5.f;
+        strokeAnimation.removedOnCompletion = NO;
+        strokeAnimation.fillMode = kCAFillModeForwards;
+        [self.dashedLine addAnimation:strokeAnimation forKey:@"strokeAnimation"];
+    }
+    
 }
 
 
