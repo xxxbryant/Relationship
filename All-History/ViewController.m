@@ -17,7 +17,7 @@
 @interface ViewController ()
 
 @property (nonatomic, strong) DBSphereView *sphereView;
-
+@property (nonatomic, strong) CAShapeLayer *dashedLine;
 @end
 
 @implementation ViewController
@@ -51,6 +51,8 @@
     }
     [_sphereView setCloudTags:array];
     [self.view addSubview:_sphereView];
+    [self drawDashLine];
+//    [self drawLine];
 }
 
 - (void)buttonPressed:(UIButton *)btn
@@ -61,6 +63,8 @@
         btn.transform = CGAffineTransformMakeScale(2., 2.);
         RelationshipVC *vc = [[UIStoryboard storyboardWithName:@"Main" bundle:nil] instantiateViewControllerWithIdentifier:@"RelationshipVC"];
         [self.navigationController pushViewController:vc animated:YES];
+//        [self.view.layer addSublayer:self->_dashedLine];
+//        [self addRotateAndPostisionForItem];
     } completion:^(BOOL finished) {
         [UIView animateWithDuration:0.3 animations:^{
             btn.transform = CGAffineTransformMakeScale(1., 1.);
@@ -69,5 +73,56 @@
         }];
     }];
 }
+
+- (void)drawDashLine {
+    _dashedLine = [CAShapeLayer layer];
+    [_dashedLine setFrame:CGRectMake(50, 600, 300 , 400)];
+
+    // Setup the path
+    CGMutablePathRef thePath = CGPathCreateMutable();
+    CGPathMoveToPoint(thePath, NULL, 0, 10);
+    CGPathAddLineToPoint(thePath, NULL, 0, 100);
+    _dashedLine.path = thePath;
+    CGPathRelease(thePath);
+
+    [_dashedLine setLineDashPattern: [NSArray arrayWithObjects:[NSNumber numberWithFloat:2], nil]];
+    _dashedLine.lineWidth = 1.0f;
+    _dashedLine.strokeColor =  [[UIColor redColor] CGColor];
+
+   
+}
+
+- (void)drawLine {
+    UIColor *color = [UIColor redColor];
+    [color set]; //设置线条颜色
+    
+    UIBezierPath* path = [UIBezierPath bezierPath];
+    path.lineWidth = 5.0;
+    
+    path.lineCapStyle = kCGLineCapRound; //线条拐角
+    path.lineJoinStyle = kCGLineJoinRound; //终点处理
+    
+    [path moveToPoint:CGPointMake(500.0, 650.0)];//起点
+    
+    // Draw the lines
+    [path addLineToPoint:CGPointMake(300.0, 100.0)];
+    [path addLineToPoint:CGPointMake(260, 200)];
+    [path addLineToPoint:CGPointMake(100.0, 200)];
+    [path addLineToPoint:CGPointMake(100, 70.0)];
+    [path closePath];//第五条线通过调用closePath方法得到的
+    
+    //    [path stroke];//Draws line 根据坐标点连线
+    [path fill];//颜色填充
+}
+
+
+- (void)addRotateAndPostisionForItem {
+    CABasicAnimation *strokeAnimation = [CABasicAnimation animationWithKeyPath:@"strokeEnd"];
+    strokeAnimation.fromValue = @0;
+    strokeAnimation.toValue = @1;
+    strokeAnimation.duration = 5.f;
+    [self.dashedLine addAnimation:strokeAnimation forKey:@"strokeAnimation"];
+}
+
 
 @end

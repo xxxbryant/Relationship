@@ -26,6 +26,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) PetalView *mainView;
 @property (nonatomic, strong) NSMutableArray *subItems;
 @property (nonatomic, strong) NSMutableArray <RelationItemView *> *itemViews;
+@property (nonatomic, strong) NSMutableArray <CAShapeLayer *> *dashLines;
+@property (nonatomic, strong) CAShapeLayer  *dashLine;
 @property (nonatomic, assign) BOOL isExpend;
 @property (nonatomic, assign) CGFloat scale;
 //- (void)setMenuItems:(NSArray *)menuItems;

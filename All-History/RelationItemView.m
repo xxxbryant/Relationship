@@ -14,8 +14,7 @@
 {
     self = [super initWithFrame:frame];
     if (self) {
-//        self.startPoint = CGPointMake(100, 100);
-//        // 修改这时的参数来调整大圆与圆之间的距离
+        // 修改这时的参数来调整大圆与圆之间的距离
         self.height = frame.size.height;
         self.width = frame.size.width;
         self.nearDistance = 20 - degree * 10;
@@ -25,9 +24,13 @@
         self.scale = 1;
         self.backgroundColor = [UIColor clearColor];
         [self addSubview:self.mainView];
+        
+        //        [self drawDashLine];
     }
     return self;
 }
+
+
 
 - (void)setSubItems:(NSMutableArray *)subItems {
     if (_subItems != subItems) {
@@ -56,23 +59,24 @@
             
             pi = pi + self.deflectRadius;
             if (array.count > 6) {
-              item.deflectRadius = pi - M_PI / 3 * array.count;
+                item.deflectRadius = pi - M_PI / 3 * array.count;
             } else {
                 item.deflectRadius = pi - M_PI / 6 * array.count;
             }
             
             item.endPoint = CGPointMake(item.startPoint.x - endRadius * cosf(pi),
                                         item.startPoint.y - endRadius * sinf(pi));
-            
-//            NSLog(@"item.endPoint: %f  itemIndex: %i", item.endPoint.x, i);
             item.nearPoint = CGPointMake(item.startPoint.x - nearRadius * cosf(pi),
                                          item.startPoint.y - nearRadius * sinf(pi));
             item.farPoint = CGPointMake(item.startPoint.x - farRadius * cosf(pi),
                                         item.startPoint.y - farRadius * sinf(pi));
             item.center = item.startPoint;
+            CAShapeLayer *shapeLayer = [self drawDashLine:item.startPoint with:item.endPoint];
+            item.dashLine = shapeLayer;
+            [item.dashLines addObject:shapeLayer];
             [self addSubview:item];
             [self.itemViews addObject:item];
-//            [self drawDashLine:item.startPoint point:item.endPoint];
+            
             if (self.degree == 0) {
                 [item setSubItems:array];
                 
@@ -97,7 +101,31 @@
             }
         }
         [self addRotateAndPostisionForItem:obj toShow:isExpend];
+        [self addDashLineAnimation:obj toShow:isExpend];
     }
+}
+
+- (void)addDashLineAnimation:(RelationItemView *)item toShow:(BOOL)show {
+    if (show) {
+        
+        CABasicAnimation *strokeAnimation = [CABasicAnimation animationWithKeyPath:@"strokeEnd"];
+        strokeAnimation.fromValue = @0;
+        strokeAnimation.toValue = @1;
+        strokeAnimation.duration = 1.5f;
+        strokeAnimation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
+        [item.dashLine addAnimation:strokeAnimation forKey:@"strokeAnimation"];
+        [item.dashLine setStrokeEnd:1];
+    } else {
+        
+        CABasicAnimation *strokeAnimation = [CABasicAnimation animationWithKeyPath:@"strokeEnd"];
+        strokeAnimation.fromValue = @1;
+        strokeAnimation.toValue = @0;
+        strokeAnimation.duration = 1.5f;
+        strokeAnimation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
+        [item.dashLine addAnimation:strokeAnimation forKey:@"strokeAnimation"];
+        [item.dashLine setStrokeEnd:0];
+    }
+    
 }
 
 - (void)addRotateAndPostisionForItem:(RelationItemView *)item toShow:(BOOL)show {
@@ -108,7 +136,7 @@
             scaleAnimation.fromValue = [NSNumber numberWithFloat:0.2];
             scaleAnimation.toValue = [NSNumber numberWithFloat:1.0];
             scaleAnimation.duration = 1.5f;
-            scaleAnimation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+            scaleAnimation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
         }
         
         CAKeyframeAnimation *rotateAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.rotation.z"];
@@ -120,7 +148,6 @@
         positionAnimation.duration = 1.5f;
         CGMutablePathRef path = CGPathCreateMutable();
         CGPathMoveToPoint(path, NULL, item.startPoint.x, item.startPoint.y);
-//        CGPathAddLineToPoint(path, NULL, item.farPoint.x, item.farPoint.y);
         CGPathAddLineToPoint(path, NULL, item.nearPoint.x, item.nearPoint.y);
         CGPathAddLineToPoint(path, NULL, item.endPoint.x, item.endPoint.y);
         positionAnimation.path = path;
@@ -128,13 +155,13 @@
         
         CAAnimationGroup *animationgroup = [CAAnimationGroup animation];
         if (self.scale) {
-            animationgroup.animations = @[scaleAnimation, rotateAnimation,positionAnimation];
+            animationgroup.animations = @[ scaleAnimation,positionAnimation];
         } else {
-            animationgroup.animations = @[positionAnimation, rotateAnimation];
+            animationgroup.animations = @[positionAnimation, scaleAnimation];
         }
         animationgroup.duration = 1.5f;
         animationgroup.fillMode = kCAFillModeForwards;
-        animationgroup.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseIn];
+        animationgroup.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
         [item.layer addAnimation:animationgroup forKey:@"Expand"];
         item.center = item.endPoint;
         
@@ -145,7 +172,7 @@
             scaleAnimation.fromValue = [NSNumber numberWithFloat:1.0];
             scaleAnimation.toValue = [NSNumber numberWithFloat:0.2];
             scaleAnimation.duration = 1.5f;
-            scaleAnimation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+            scaleAnimation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
         }
         
         CAKeyframeAnimation *rotateAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.rotation.z"];
@@ -156,7 +183,6 @@
         positionAnimation.duration = 1.5f;
         CGMutablePathRef path = CGPathCreateMutable();
         CGPathMoveToPoint(path, NULL, item.endPoint.x, item.endPoint.y);
-//        CGPathAddLineToPoint(path, NULL, item.farPoint.x, item.farPoint.y);
         CGPathAddLineToPoint(path, NULL, item.nearPoint.x, item.nearPoint.y);
         CGPathAddLineToPoint(path, NULL, item.startPoint.x, item.startPoint.y);
         positionAnimation.path = path;
@@ -164,14 +190,14 @@
         
         CAAnimationGroup *animationgroup = [CAAnimationGroup animation];
         if (self.scale) {
-            animationgroup.animations = @[scaleAnimation,  rotateAnimation,positionAnimation];
+            animationgroup.animations = @[scaleAnimation,positionAnimation];
         } else {
-            animationgroup.animations = @[positionAnimation, rotateAnimation];
+            animationgroup.animations = @[positionAnimation, scaleAnimation];
         }
         
         animationgroup.duration = 1.5f;
         animationgroup.fillMode = kCAFillModeForwards;
-        animationgroup.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseIn];
+        animationgroup.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
         [item.layer addAnimation:animationgroup forKey:@"Close"];
         item.center = item.startPoint;
     }
@@ -180,6 +206,27 @@
 - (void)expend {
     _isExpend = !_isExpend;
     [self expend:_isExpend];
+}
+
+- (CAShapeLayer *)drawDashLine:(CGPoint)startPoint with:(CGPoint)endPoint {
+    CAShapeLayer *dashedLine = [CAShapeLayer layer];
+    // 这个大小决定着是否可以被绘制出来
+    [dashedLine setFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height)];
+    
+    // Setup the path
+    CGMutablePathRef thePath = CGPathCreateMutable();
+    CGPathMoveToPoint(thePath, NULL, startPoint.x, startPoint.y);
+    CGPathAddLineToPoint(thePath, NULL, endPoint.x, endPoint.y);
+    dashedLine.path = thePath;
+    CGPathRelease(thePath);
+    
+    [dashedLine setLineDashPattern: [NSArray arrayWithObjects:[NSNumber numberWithFloat:2], nil]];
+    dashedLine.lineWidth = 1.0f;
+    dashedLine.strokeColor =  [[UIColor redColor] CGColor];
+    
+    [self.layer addSublayer:dashedLine];
+    [dashedLine setStrokeEnd:0];
+    return dashedLine;
 }
 
 
@@ -209,6 +256,13 @@
         _itemViews = [NSMutableArray array];
     }
     return _itemViews;
+}
+
+- (NSMutableArray<CAShapeLayer *> *)dashLines {
+    if (_dashLines == nil) {
+        _dashLines = [NSMutableArray array];
+    }
+    return _dashLines;
 }
 
 -(UIView*)hitTest:(CGPoint)point withEvent:(UIEvent*)event {
